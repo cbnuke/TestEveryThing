@@ -96,9 +96,16 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
 
         } else if (id == R.id.nav_manage) {
+            ToolsActivity toolsActivity = new ToolsActivity();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.contentPanel, toolsActivity);
+            transaction.commit();
 
         } else if (id == R.id.nav_share) {
-
+            ShareActivity shareActivity = new ShareActivity();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.contentPanel, shareActivity);
+            transaction.commit();
         } else if (id == R.id.nav_send) {
 
         }
