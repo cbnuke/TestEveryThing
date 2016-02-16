@@ -25,7 +25,7 @@ public class ShareActivity extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.share_main, container, false);
         txtEmail = (EditText) rootView.findViewById(R.id.txtEmail);
-        txtPass = (EditText) rootView.findViewById(R.id.txtPass);
+        txtPass = (EditText) rootView.findViewById(R.id.txtPass2);
         txtFirst = (EditText) rootView.findViewById(R.id.txtFirst);
         txtLast = (EditText) rootView.findViewById(R.id.txtLast);
         btnRegister = (Button) rootView.findViewById(R.id.btnRegister);

@@ -1,17 +1,27 @@
 package com.cbnuke.testeverything;
 
+import android.app.Application;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.cbnuke.testeverything.apimodel.ApiLogin;
 import com.cbnuke.testeverything.apimodel.ApiRegister;
+import com.cbnuke.testeverything.apimodel.ApiRegisterPlaces;
 import com.cbnuke.testeverything.apimodel.ApiStatus;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 
 import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -21,7 +31,7 @@ import okhttp3.Response;
  * Created by Amnart on 11/2/2559.
  */
 public class ApiConnect {
-    private String URL = "http://10.0.2.2/TourismKKC/API/";
+    private String URL = "http://192.168.0.4/TourismKKC/API/";
     private String TAG = "DEBUG";
     private OkHttpClient okHttpClient = new OkHttpClient();
 
@@ -86,6 +96,44 @@ public class ApiConnect {
         }
     }
 
+    private ApiStatus registerPlaces(ApiRegisterPlaces apiRegisterPlaces) {
+        String path = apiRegisterPlaces.getFiles();
+        String filename = path.substring(path.lastIndexOf("/"));
+        String mime = apiRegisterPlaces.getMime();
+
+        RequestBody formBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("user_email", apiRegisterPlaces.getUser_email())
+                .addFormDataPart("user_password", apiRegisterPlaces.getUser_password())
+                .addFormDataPart("location_lat", apiRegisterPlaces.getLocation_lat())
+                .addFormDataPart("location_lng", apiRegisterPlaces.getLocation_lng())
+                .addFormDataPart("places_name", apiRegisterPlaces.getPlaces_name())
+                .addFormDataPart("places_desc", apiRegisterPlaces.getPlaces_desc())
+                .addFormDataPart("type_detail_id", apiRegisterPlaces.getType_detail_id())
+                .addFormDataPart("files", filename, RequestBody.create(MediaType.parse(mime), new File(path)))
+                .build();
+
+        Request.Builder builder = new Request.Builder();
+        Request request = builder
+                .url(URL + "register_places")
+                .post(formBody)
+                .build();
+
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            if (response.isSuccessful()) {
+                return checkAPIStatus(response.body().string());
+            } else {
+                Log.d(TAG, "Not Success - code in login : " + response.code());
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "ERROR in login : " + e.getMessage());
+            return null;
+        }
+    }
+
     private ApiStatus checkAPIStatus(String json_string) {
         ApiStatus apiStatus = new ApiStatus();
         try {
@@ -110,82 +158,4 @@ public class ApiConnect {
         return apiStatus;
     }
 
-    /*@Override
-    protected String doInBackground(Void... voids) {
-        OkHttpClient okHttpClient = new OkHttpClient();
-        RequestBody formBody = new FormEncodingBuilder()
-                .add("user_email", "test@test.com")
-                .add("user_password", "1234")
-                .add("user_fname", "Test")
-                .add("user_lname", "Com")
-                .build();
-        *//*RequestBody requestBody = new MultipartBuilder()
-                .type(MultipartBuilder.FORM)
-                .addPart(
-                        Headers.of("Content-Disposition", "form-data; name=\"user_email\""),
-                        RequestBody.create(null, "test@test.com"))
-                .addPart(
-                        Headers.of("Content-Disposition", "form-data; name=\"user_password\""),
-                        RequestBody.create(null, "1234"))
-                .addPart(
-                        Headers.of("Content-Disposition", "form-data; name=\"user_fname\""),
-                        RequestBody.create(null, "Test"))
-                .addPart(
-                        Headers.of("Content-Disposition", "form-data; name=\"user_lname\""),
-                        RequestBody.create(null, "Com"))
-                .addPart(
-                        Headers.of("Content-Disposition", "form-data; name=\"image\""),
-                        RequestBody.create(MEDIA_TYPE_PNG, new File("website/static/logo-square.png")))
-                .build();*//*
-        Request.Builder builder = new Request.Builder();
-        String URL = "http://192.168.0.132/TourismKKC/main/register";
-        Request request = builder.url(URL).post(formBody).build();
-        Log.d(TAG, "Start API");
-        try {
-            Response response = okHttpClient.newCall(request).execute();
-            if (response.isSuccessful()) {
-                return response.body().string();
-            } else {
-                Log.d(TAG, "Not Success - code : " + response.code());
-                return "Not Success - code : " + response.code();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d(TAG, "Error - " + e.getMessage());
-            return "Error - " + e.getMessage();
-        }
-    }
-    @Override
-    protected void onPostExecute(String string) {
-        super.onPostExecute(string);
-        Log.d(TAG, "End API");
-        Log.d(TAG, string);
-        try {
-            JSONObject jStatus = new JSONObject(string);
-            String status = jStatus.getString("status");
-            Log.d(TAG, "STATUS:" + status);
-            JSONObject objData = jStatus.getJSONObject("data");
-            String action = objData.getString("action");
-            Log.d(TAG, "ACTION:" + action);
-            String reason = objData.getString("reason");
-            Log.d(TAG, "REASON:" + reason);
-            *//*JSONArray jArray = jObject.getJSONArray("data");
-            for (int i = 0; i < jArray.length(); i++) {
-                try {
-                    Log.d(TAG, "Loop " + i);
-                    JSONObject oneObject = jArray.getJSONObject(i);
-                    // Pulling items from the array
-                    String oneObjectsItem = oneObject.getString("action");
-                    String oneObjectsItem2 = oneObject.getString("reason");
-                    Log.d(TAG, oneObjectsItem);
-                    Log.d(TAG, oneObjectsItem2);
-                } catch (JSONException e) {
-                    // Oops
-                }
-            }*//*
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.d(TAG, "ERROR " + e.toString());
-        }
-    }*/
 }
